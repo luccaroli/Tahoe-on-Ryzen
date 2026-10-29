@@ -1,6 +1,6 @@
 # Tahoe-on-Ryzen
 
-macOS **Tahoe 26.7.2** running with OpenCore on a budget AMD PC: Ryzen 5 5500 + Radeon RX 6600 + Intel AX210 Wi-Fi. Full graphics acceleration (Metal 3), Wi-Fi, Ethernet, and Xcode 26.5 building real iOS apps in the Simulator.
+macOS **Tahoe 26.7.2** running with OpenCore on a budget AMD PC: Ryzen 5 5500 + Radeon RX 6600 + Intel AX210 Wi-Fi. Full graphics acceleration (Metal 3), Wi-Fi, Bluetooth, Ethernet, and Xcode 26.5 building real iOS apps in the Simulator.
 
 ## Tested hardware
 
@@ -12,7 +12,8 @@ macOS **Tahoe 26.7.2** running with OpenCore on a budget AMD PC: Ryzen 5 5500 + 
 | Wi-Fi | Intel AX210 | ✅ itlwm + HeliPort |
 | Ethernet | Realtek RTL8111 | ✅ RealtekRTL8111 |
 | Audio | AMD HD Audio | ⚠️ AppleALC loaded, `alcid=1`, layout still being tuned |
-| Bluetooth | Intel AX210 | ❌ Not configured yet |
+| Bluetooth | Intel AX210 | ✅ IntelBluetoothFirmware + IntelBTPatcher + BlueToolFixup (tested on 26.7.2, Echo Dot paired as A2DP speaker) |
+| AirDrop / Continuity | Intel AX210 | ⚠️ Limited (Handoff-level features only, no AirDrop/Hotspot) |
 | RAM | 16 GB | ✅ |
 
 ## Versions
@@ -27,6 +28,9 @@ macOS **Tahoe 26.7.2** running with OpenCore on a budget AMD PC: Ryzen 5 5500 + 
 | NootRX | 1.0.0 |
 | AppleALC | 1.9.8 |
 | itlwm | 2.3.0 (+ HeliPort) |
+| IntelBluetoothFirmware | [2.5.2 (lshbluesky fork)](https://github.com/lshbluesky/IntelBluetoothFirmware/releases/tag/v2.5.2) |
+| IntelBTPatcher | [2.5.2 (lshbluesky fork)](https://github.com/lshbluesky/IntelBluetoothFirmware/releases/tag/v2.5.2) |
+| BlueToolFixup | [2.7.2 (BrcmPatchRAM)](https://github.com/acidanthera/BrcmPatchRAM/releases/tag/2.7.2) |
 | RealtekRTL8111 | 3.0.4 |
 | NVMeFix | 1.1.3 |
 | RestrictEvents | 1.1.6 |
@@ -43,6 +47,8 @@ macOS **Tahoe 26.7.2** running with OpenCore on a budget AMD PC: Ryzen 5 5500 + 
 - **GPU**: the native RX 6600 driver kernel panicked (PPLIB) in WindowServer. **NootRX** fixes it.
 - **Wi-Fi on Tahoe**: itlwm 2.3.0 only works with `Kernel > Quirks > DisableIoMapper = true`.
 - **Wi-Fi**: use **itlwm + HeliPort** instead of AirportItlwm, which breaks iMessage, AirDrop and Hotspot.
+- **Bluetooth on Tahoe**: the official OpenIntelWireless IntelBTPatcher stops at Sequoia, so this EFI uses the Tahoe-ready [lshbluesky fork](https://github.com/lshbluesky/IntelBluetoothFirmware) (v2.5.2) plus [BlueToolFixup 2.7.2](https://github.com/acidanthera/BrcmPatchRAM) from Acidanthera (macOS 26 `bluetoothd` patches). Kexts load right after itlwm in this order: IntelBluetoothFirmware, IntelBTPatcher, BlueToolFixup. IntelBluetoothInjector is **not** used. NVRAM adds `bluetoothExternalDongleFailed = 00` and `bluetoothInternalControllerInfo = 14 zero bytes` (also listed under `NVRAM > Delete`). Do a **Reset NVRAM** from the OpenCore menu after applying.
+- **Bluetooth USB port**: the AX210 Bluetooth (`8087:0032`) shows up on the internal USB 2.0 port `PO10` and works **without a USBMap** (connector type reported as 0, not 255). If your Bluetooth stays Off or shows a fake `BCM_4350C2` chipset, make a USB map (e.g. USBToolBox) and set that port to Internal (255).
 - `SecureBootModel = Disabled`.
 - boot-args: `alcid=1 keepsyms=1 debug=0x100`.
 - **AMD Vanilla** kernel patches are set for **6 cores**. If your Ryzen has a different core count, adjust the 3 `algrey - Force cpuid_cores_per_package` patches following [AMD Vanilla](https://github.com/AMD-OSX/AMD_Vanilla).
@@ -87,12 +93,11 @@ In `config.plist`, set `Misc > Boot > ShowPicker = false` (hold Esc to show the 
 
 - No virtualization inside macOS on AMD: no Docker, no Android emulator.
 - AirDrop, Handoff and Continuity are limited with Intel Wi-Fi.
-- Intel Bluetooth not tested yet (IntelBluetoothFirmware + BlueToolFixup).
 - USB map not done yet.
 
 ## Credits
 
-[Acidanthera](https://github.com/acidanthera), [AMD-OSX](https://github.com/AMD-OSX), [ChefKiss (NootRX)](https://github.com/ChefKissInc/NootRX), [OpenIntelWireless](https://github.com/OpenIntelWireless), [Mieze (RealtekRTL8111)](https://github.com/Mieze/RTL8111_driver_for_OS_X) and the [Dortania OpenCore Install Guide](https://dortania.github.io/OpenCore-Install-Guide/).
+[Acidanthera](https://github.com/acidanthera), [AMD-OSX](https://github.com/AMD-OSX), [ChefKiss (NootRX)](https://github.com/ChefKissInc/NootRX), [OpenIntelWireless](https://github.com/OpenIntelWireless), [lshbluesky (Tahoe Intel Bluetooth fork)](https://github.com/lshbluesky/IntelBluetoothFirmware), [Mieze (RealtekRTL8111)](https://github.com/Mieze/RTL8111_driver_for_OS_X) and the [Dortania OpenCore Install Guide](https://dortania.github.io/OpenCore-Install-Guide/).
 
 If this helped you, leave a ⭐! Use at your own risk.
 
