@@ -1,25 +1,23 @@
 # Tahoe-on-Ryzen
 
-macOS **Tahoe 26.7.2** rodando com OpenCore em um PC AMD de baixo custo: Ryzen 5 5500 + Radeon RX 6600 + Wi-Fi Intel AX210. Com aceleração gráfica (Metal 3), Wi-Fi, Ethernet e Xcode 26.5 compilando apps iOS de verdade no Simulador.
+macOS **Tahoe 26.7.2** running with OpenCore on a budget AMD PC: Ryzen 5 5500 + Radeon RX 6600 + Intel AX210 Wi-Fi. Full graphics acceleration (Metal 3), Wi-Fi, Ethernet, and Xcode 26.5 building real iOS apps in the Simulator.
 
-> 🇺🇸 OpenCore EFI for macOS Tahoe on a Ryzen 5 5500 / A520M / RX 6600 / Intel AX210 build. Tested and working, including Xcode 26.5 and the iOS 26.5 Simulator. English summary at the bottom.
+## Tested hardware
 
-## Hardware testado
-
-| Componente | Modelo | Status |
+| Component | Model | Status |
 |---|---|---|
-| CPU | AMD Ryzen 5 5500 (6 núcleos / 12 threads) | ✅ AMD Vanilla patches (6 núcleos) |
-| Placa-mãe | SOYO SY-KL A520M | ✅ |
+| CPU | AMD Ryzen 5 5500 (6 cores / 12 threads) | ✅ AMD Vanilla patches (6 cores) |
+| Motherboard | SOYO SY-KL A520M | ✅ |
 | GPU | AMD Radeon RX 6600 (Navi 23) | ✅ Metal 3, via NootRX |
 | Wi-Fi | Intel AX210 | ✅ itlwm + HeliPort |
 | Ethernet | Realtek RTL8111 | ✅ RealtekRTL8111 |
-| Áudio | AMD HD Audio | ⚠️ AppleALC carregado, `alcid=1`, layout ainda em ajuste |
-| Bluetooth | Intel AX210 | ❌ Ainda não configurado |
+| Audio | AMD HD Audio | ⚠️ AppleALC loaded, `alcid=1`, layout still being tuned |
+| Bluetooth | Intel AX210 | ❌ Not configured yet |
 | RAM | 16 GB | ✅ |
 
-## Versões
+## Versions
 
-| Item | Versão |
+| Item | Version |
 |---|---|
 | OpenCore | 1.0.8 |
 | macOS | Tahoe 26.7.2 (25G332) |
@@ -34,72 +32,66 @@ macOS **Tahoe 26.7.2** rodando com OpenCore em um PC AMD de baixo custo: Ryzen 5
 | RestrictEvents | 1.1.6 |
 | AppleMCEReporterDisabler | 1.2 |
 
-`AMDRyzenCPUPowerManagement` e `SMCAMDProcessor` estão incluídos, mas **desativados** no config.
+`AMDRyzenCPUPowerManagement` and `SMCAMDProcessor` are included but **disabled** in the config.
 
-## ⚠️ Antes de usar: gere seu próprio SMBIOS
+## ⚠️ Before you use it: generate your own SMBIOS
 
-O `config.plist` vem com `SystemSerialNumber`, `MLB` e `SystemUUID` como `CHANGE_ME` e o `ROM` zerado. Gere os seus com o [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS) (modelo **MacPro7,1**), coloque em `PlatformInfo > Generic` e use o endereço MAC da sua placa de rede como `ROM`. Confira no [site de cobertura da Apple](https://checkcoverage.apple.com) que o serial dá **inválido** antes de entrar com o Apple ID.
+`config.plist` ships with `SystemSerialNumber`, `MLB` and `SystemUUID` set to `CHANGE_ME` and `ROM` zeroed. Generate your own with [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS) (model **MacPro7,1**), put them in `PlatformInfo > Generic`, and use your network card's MAC address as `ROM`. Check on [Apple's coverage site](https://checkcoverage.apple.com) that the serial comes back **invalid** before signing in with your Apple ID.
 
-## Configurações importantes
+## Key settings
 
-- **GPU**: o driver nativo da RX 6600 dava kernel panic (PPLIB) no WindowServer. O **NootRX** resolve.
-- **Wi-Fi no Tahoe**: o itlwm 2.3.0 só funciona com `Kernel > Quirks > DisableIoMapper = true`.
-- **Wi-Fi**: use **itlwm + HeliPort** em vez de AirportItlwm, porque o AirportItlwm atrapalha iMessage, AirDrop e Hotspot.
+- **GPU**: the native RX 6600 driver kernel panicked (PPLIB) in WindowServer. **NootRX** fixes it.
+- **Wi-Fi on Tahoe**: itlwm 2.3.0 only works with `Kernel > Quirks > DisableIoMapper = true`.
+- **Wi-Fi**: use **itlwm + HeliPort** instead of AirportItlwm, which breaks iMessage, AirDrop and Hotspot.
 - `SecureBootModel = Disabled`.
 - boot-args: `alcid=1 keepsyms=1 debug=0x100`.
-- Patches de kernel **AMD Vanilla** já configurados para **6 núcleos**. Se o seu Ryzen tiver outra quantidade de núcleos, ajuste os 3 patches `algrey - Force cpuid_cores_per_package` conforme o [AMD Vanilla](https://github.com/AMD-OSX/AMD_Vanilla).
+- **AMD Vanilla** kernel patches are set for **6 cores**. If your Ryzen has a different core count, adjust the 3 `algrey - Force cpuid_cores_per_package` patches following [AMD Vanilla](https://github.com/AMD-OSX/AMD_Vanilla).
 
 ## BIOS
 
-- CSM: **desligado** (boot UEFI puro)
-- SVM: ligado
-- Above 4G Decoding: **ligado**
-- Resizable BAR: **desligado**
-- Secure Boot: desligado
+- CSM: **off** (pure UEFI boot)
+- SVM: on
+- Above 4G Decoding: **on**
+- Resizable BAR: **off**
+- Secure Boot: off
 
-## Instalação (resumo)
+## Installation (summary)
 
-1. Baixe o recovery com o `macrecovery.py` do OpenCorePkg e grave num pendrive FAT32 junto com esta pasta `EFI`.
-2. Desconecte os outros discos durante a instalação.
-3. Dica: o recovery do **Sonoma** foi o mais estável neste hardware. Instale o Sonoma e depois atualize para o Tahoe pela Atualização de Software.
-4. Depois de instalar, copie a `EFI` para a partição EFI do disco do macOS.
+1. Download the recovery with `macrecovery.py` from OpenCorePkg and put it on a FAT32 USB drive along with this `EFI` folder.
+2. Disconnect your other drives during installation.
+3. Tip: the **Sonoma** recovery was the most stable on this hardware. Install Sonoma, then upgrade to Tahoe through Software Update.
+4. After installing, copy the `EFI` folder to the EFI partition of the macOS drive.
 
-## Dual boot com Ubuntu (GRUB)
+## Dual boot with Ubuntu (GRUB)
 
-Para abrir o macOS pelo GRUB sem passar por dois menus, adicione em `/etc/grub.d/40_custom`:
+To boot macOS straight from GRUB without going through two menus, add this to `/etc/grub.d/40_custom`:
 
 ```
 menuentry "macOS" --class macosx {
     insmod part_gpt
     insmod fat
-    search --no-floppy --fs-uuid --set=root UUID-DA-EFI-DO-MAC
+    search --no-floppy --fs-uuid --set=root YOUR-MAC-EFI-UUID
     chainloader /EFI/BOOT/BOOTx64.efi
 }
 ```
 
-E no `config.plist`, deixe `Misc > Boot > ShowPicker = false` (segurar Esc mostra o menu do OpenCore). Depois rode `sudo update-grub`.
+In `config.plist`, set `Misc > Boot > ShowPicker = false` (hold Esc to show the OpenCore menu). Then run `sudo update-grub`.
 
-## Desenvolvimento iOS
+## iOS development
 
-- **Xcode 26.5 (Universal)** funciona. **Xcode 27+ é só para Apple Silicon** e não abre em Hackintosh ("bad CPU type").
-- Simulador iOS 26.5 funciona, mas fica lento em HD mecânico. Use SSD.
-- Homebrew não instala em hardware Intel/AMD no Tahoe. Instale Node, gh, Ruby etc. manualmente em `~/.local`.
+- **Xcode 26.5 (Universal)** works. **Xcode 27+ is Apple Silicon only** and won't launch on a Hackintosh ("bad CPU type").
+- The iOS 26.5 Simulator works, but it's slow on a spinning hard drive. Use an SSD.
+- Homebrew refuses to install on Intel/AMD hardware on Tahoe. Install Node, gh, Ruby, etc. manually under `~/.local`.
 
-## Limitações
+## Limitations
 
-- Sem virtualização dentro do macOS em AMD: nada de Docker, nem do emulador Android.
-- AirDrop, Handoff e Continuidade limitados com o Wi-Fi Intel.
-- Bluetooth Intel ainda não testado (IntelBluetoothFirmware + BlueToolFixup).
-- Mapa USB ainda não feito.
+- No virtualization inside macOS on AMD: no Docker, no Android emulator.
+- AirDrop, Handoff and Continuity are limited with Intel Wi-Fi.
+- Intel Bluetooth not tested yet (IntelBluetoothFirmware + BlueToolFixup).
+- USB map not done yet.
 
-## Créditos
+## Credits
 
-[Acidanthera](https://github.com/acidanthera), [AMD-OSX](https://github.com/AMD-OSX), [ChefKiss (NootRX)](https://github.com/ChefKissInc/NootRX), [OpenIntelWireless](https://github.com/OpenIntelWireless), [Mieze (RealtekRTL8111)](https://github.com/Mieze/RTL8111_driver_for_OS_X) e o [Dortania OpenCore Install Guide](https://dortania.github.io/OpenCore-Install-Guide/).
+[Acidanthera](https://github.com/acidanthera), [AMD-OSX](https://github.com/AMD-OSX), [ChefKiss (NootRX)](https://github.com/ChefKissInc/NootRX), [OpenIntelWireless](https://github.com/OpenIntelWireless), [Mieze (RealtekRTL8111)](https://github.com/Mieze/RTL8111_driver_for_OS_X) and the [Dortania OpenCore Install Guide](https://dortania.github.io/OpenCore-Install-Guide/).
 
----
-
-## 🇺🇸 English summary
-
-Working OpenCore 1.0.8 EFI for **macOS Tahoe 26.7.2** on Ryzen 5 5500 + A520M + RX 6600 + Intel AX210. Key points: NootRX for the RX 6600 (native driver panics), `DisableIoMapper = true` for itlwm on Tahoe, AMD Vanilla patches set for 6 cores, SMBIOS MacPro7,1 (**generate your own serials, they are blank here**). Xcode 26.5 works; Xcode 27+ is Apple Silicon only. If this helped you, leave a ⭐!
-
-Use at your own risk.
+If this helped you, leave a ⭐! Use at your own risk.
