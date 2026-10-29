@@ -95,3 +95,7 @@ In `config.plist`, set `Misc > Boot > ShowPicker = false` (hold Esc to show the 
 [Acidanthera](https://github.com/acidanthera), [AMD-OSX](https://github.com/AMD-OSX), [ChefKiss (NootRX)](https://github.com/ChefKissInc/NootRX), [OpenIntelWireless](https://github.com/OpenIntelWireless), [Mieze (RealtekRTL8111)](https://github.com/Mieze/RTL8111_driver_for_OS_X) and the [Dortania OpenCore Install Guide](https://dortania.github.io/OpenCore-Install-Guide/).
 
 If this helped you, leave a ⭐! Use at your own risk.
+
+## Using an AI agent?
+
+This repo includes [`AGENTS.md`](AGENTS.md) with step-by-step instructions any AI coding agent (Claude Code, Codex, Grok, Cursor, Copilot) can follow to adapt this EFI to your hardware safely. Just clone the repo and ask your agent: *"Read AGENTS.md and help me set this up for my PC."*
